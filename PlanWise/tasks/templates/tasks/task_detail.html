@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form.instance.pk|yesno:"Edit Task,Create Task" }} - TaskWise{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ form.instance.pk|yesno:"Edit Task,Create Task" }}</h2>
+        <a href="{% url 'task_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Tasks
+        </a>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Title</label>
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Description</label>
+            {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_category" class="form-label">Category</label>
+            {% if form.category.errors %}
+                <div class="text-danger">{{ form.category.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_due_date" class="form-label">Due Date</label>
+            {% if form.due_date.errors %}
+                <div class="text-danger">{{ form.due_date.errors }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">
+            {{ form.instance.pk|yesno:"Update Task,Create Task" }}
+        </button>
+    </form>
+{% endblock %}
