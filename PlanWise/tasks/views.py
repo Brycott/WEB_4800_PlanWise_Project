@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from .models import Task, Category
 from .forms import TaskForm, CategoryForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -59,6 +60,7 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
     
+    success_url = reverse_lazy('task_list')
     def form_valid(self, form):
         return super().form_valid(form)
 
@@ -86,6 +88,7 @@ class CategoryCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Category created successfully!')
         return super().form_valid(form)
 
+@login_required
 def task_by_category(request, category_id):
     tasks = Task.objects.filter(category_id=category_id, user=request.user)
     category = get_object_or_404(Category, id=category_id)
@@ -94,16 +97,13 @@ def task_by_category(request, category_id):
         'category': category
     })
 
+@login_required
 def toggle_complete(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
     task.is_completed = not task.is_completed
     task.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('task_list')))
-    category = get_object_or_404(Category, id=category_id)
-    return render(request, 'tasks/tasks_by_category.html', {
-        'tasks': tasks,
-        'category': category
-    })
+    
 
 class CategoryUpdateView(LoginRequiredMixin, UpdateView):
     model = Category

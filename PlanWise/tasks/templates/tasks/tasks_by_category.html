@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Tasks in {{ category.name }}{% endblock %}
+{% block content %}
+  <h2>Tasks in {{ category.name }}</h2>
+  {% if tasks %}
+    <ul class="list-group mb-4">
+      {% for task in tasks %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ task.title }}</span>
+          <span>
+            {% if task.is_completed %}
+              <span class="badge bg-success">Completed</span>
+            {% else %}
+              <span class="badge bg-warning text-dark">Incomplete</span>
+            {% endif %}
+            <a href="{% url 'task_detail' task.pk %}" class="btn btn-sm btn-outline-primary ms-2">Details</a>
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tasks found in this category.</p>
+  {% endif %}
+  <a href="{% url 'task_list' %}" class="btn btn-secondary">Back to All Tasks</a>
+{% endblock %}
