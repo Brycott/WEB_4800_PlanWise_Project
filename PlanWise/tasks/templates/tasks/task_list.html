@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<div class="container"></div>
+<div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>My Tasks</h2>
         <a href="{% url 'task_create' %}" class="btn btn-primary">
@@ -23,7 +24,8 @@
     </div>
 
     {% if tasks %}
-    <div class="row">
+    <!-- Card View -->
+    <div id="cardView" class="row">
         {% for task in tasks %}
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card shadow h-100 {% if task.completed %}border-success{% endif %}">
@@ -55,7 +57,6 @@
                         </h5>
                         <p class="card-text mb-2">{{ task.description|truncatewords:20 }}</p>
                         <ul class="list-group list-group-flush mb-2">
-                            
                             <li class="list-group-item py-1">
                                 <small class="text-muted"><i class="fas fa-calendar-alt"></i> Created: {{ task.created_at|date:"M d, Y" }}</small>
                                 <br>
@@ -82,6 +83,47 @@
             </div>
         {% endfor %}
     </div>
+
+    <!-- List View -->
+    <div id="listView" class="d-none">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.description|truncatewords:20 }}</td>
+                    <td>{{ task.category }}</td>
+                    <td>{{ task.due_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if task.is_completed %}
+                            <span class="badge bg-success">Completed</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Incomplete</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'task_detail' task.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <form action="{% url 'task_delete' task.pk %}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this task?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
     <div class="text-center mt-5">
         <h3>No tasks found.</h3>
@@ -92,4 +134,19 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+function showCardView() {
+    document.getElementById('cardView').classList.remove('d-none');
+    document.getElementById('listView').classList.add('d-none');
+    document.getElementById('currentViewLabel').textContent = 'Card View';
+}
+function showListView() {
+    document.getElementById('cardView').classList.add('d-none');
+    document.getElementById('listView').classList.remove('d-none');
+    document.getElementById('currentViewLabel').textContent = 'List View';
+}
+// Default to card view
+showCardView();
+</script>
 {% endblock %}
