@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Task Calendar
+{%endblock %} {% block content %}
+<div class="container bg-secondaryc">
+  <h2 class="mb-4">PlanWise Calendar</h2>
+  <div class="calendar-header">
+    <span class="mx-2" data-calendar-label="month"></span>
+  </div>
+  <div id="calendar"></div>
+</div>
+<!-- Use local FullCalendar static files -->
+<link rel="stylesheet" href="{% static 'bootstrap-calendar/calendar.min.css' %}"/>
+<script src="{% static 'bootstrap-calendar/calendar.min.js' %}"></script>
+<script>
+  $(function() {
+      // Safely inject events JSON
+      var events = [];
+      var eventsJson = document.getElementById("events-json").textContent;
+    try {
+      events = JSON.parse(eventsJson);
+      // No conversion needed, backend outputs correct timestamp
+      console.log('Calendar events:', events);
+    } catch (e) {
+      console.error("Failed to parse events JSON:", e);
+    }
+    var $calendar = $("#calendar");
+    $calendar.calendar({
+      tmpl_path: '{% static "bootstrap-calendar/tmpls/" %}',
+      events_source: events,
+      view: 'month', // Ensure full month view
+      weekbox: true, // Show full month grid
+      onAfterViewLoad: function() {
+        var month = this.getTitle();
+        $('[data-calendar-label="month"]').text(month);
+      }
+    });
+  });
+</script>
+<script id="events-json" type="application/json">
+  {{ events_json|safe }}
+</script>
+{% endblock %}

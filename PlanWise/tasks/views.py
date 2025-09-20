@@ -103,6 +103,28 @@ def toggle_complete(request, pk):
     task.is_completed = not task.is_completed
     task.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('task_list')))
+
+# Calendar view for tasks
+@login_required
+def calendar_view(request):
+    import json
+    from django.utils.dateparse import parse_datetime
+    tasks = Task.objects.filter(user=request.user).exclude(due_date__isnull=True)
+    events = []
+    from datetime import datetime
+    for task in tasks:
+        if task.due_date:
+            # Convert date to timestamp at midnight
+            dt = datetime.combine(task.due_date, datetime.min.time())
+            timestamp = int(dt.timestamp() * 1000)
+            events.append({
+                'id': task.id,
+                'title': task.title,
+                'start': timestamp,
+                'url': f"/task/{task.id}/",  # Match Django URL pattern
+            })
+    events_json = json.dumps(events)
+    return render(request, 'tasks/calendar.html', {'events_json': events_json, 'tasks': tasks})
     
 
 class CategoryUpdateView(LoginRequiredMixin, UpdateView):

@@ -11,4 +11,5 @@ urlpatterns = [
     path('task/<int:pk>/toggle/', views.toggle_complete, name='task_toggle complete'),
     path('category/new/', views.CategoryCreateView.as_view(), name='category_create'),
     path('category/<int:category_id>/', views.task_by_category, name='tasks_by_category'),
+    path('calendar/', views.calendar_view, name='task_calendar'),
 ]
