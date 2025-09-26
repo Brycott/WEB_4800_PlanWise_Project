@@ -9,16 +9,14 @@
 </div>
 <!-- Use local FullCalendar static files -->
 <link rel="stylesheet" href="{% static 'bootstrap-calendar/calendar.min.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
 <script src="{% static 'bootstrap-calendar/calendar.min.js' %}"></script>
 <script>
   $(function() {
-      // Safely inject events JSON
       var events = [];
       var eventsJson = document.getElementById("events-json").textContent;
     try {
       events = JSON.parse(eventsJson);
-      // No conversion needed, backend outputs correct timestamp
-      console.log('Calendar events:', events);
     } catch (e) {
       console.error("Failed to parse events JSON:", e);
     }
@@ -26,6 +24,7 @@
     $calendar.calendar({
       tmpl_path: '{% static "bootstrap-calendar/tmpls/" %}',
       events_source: events,
+      tmpl_cache: false,
       view: 'month', // Ensure full month view
       weekbox: true, // Show full month grid
       onAfterViewLoad: function() {

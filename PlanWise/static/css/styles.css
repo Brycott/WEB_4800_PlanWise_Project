@@ -61,13 +61,77 @@ body {
     color: #f1f1f1;
 }
 
-.main {
-    margin-left: 200px;
-    /* must match the sidebar width */
-    padding: 20px;
+/* Sidebar collapse support */
+body.sidebar-collapsed .sidenav,
+.sidenav.sidenav-collapsed {
+    width: 0 !important;
+    padding-top: 0 !important;
+    overflow: hidden !important;
 }
+body.sidebar-collapsed .sidenav a,
+body.sidebar-collapsed .sidenav .navbar-brand,
+.sidenav.sidenav-collapsed a,
+.sidenav.sidenav-collapsed .navbar-brand { opacity: 0; pointer-events: none; }
+body.sidebar-collapsed .main,
+body.sidebar-collapsed .navbar { margin-left: 0 !important; }
+.sidenav.sidenav-collapsed ~ .navbar,
+.sidenav.sidenav-collapsed ~ .container-fluid .main { margin-left: 0 !important; }
 
-.navbar {
-    margin-left: 200px;
-    /* must match the sidebar width */
+/* Make content span full width when collapsed */
+body.sidebar-collapsed .container-fluid { padding-left: 0; }
+body.sidebar-collapsed .main { width: 100%; }
+body.sidebar-collapsed .navbar .container { max-width: 100%; padding-left: 1rem; padding-right: 1rem; }
+body.sidebar-collapsed .navbar { width: 100%; }
+/* Prevent unintended leftover horizontal space */
+body.sidebar-collapsed .navbar, body.sidebar-collapsed .main { transition: margin-left .25s ease, width .25s ease; }
+
+/* Layout variables */
+:root { --sidebar-width: 200px; }
+.sidenav { width: var(--sidebar-width); }
+.main { margin-left: var(--sidebar-width); padding: 20px; }
+.navbar { margin-left: var(--sidebar-width); }
+
+/* Smooth transitions */
+.sidenav, .main, .navbar { transition: margin-left .25s ease, width .25s ease, padding .25s ease; }
+
+/* Expanded state ensure flush alignment: left edge of content exactly at sidebar edge */
+
+/* Toggle button visual tweak */
+.sidebar-toggle-btn { margin-right: 1rem; }
+
+/* Calendar: show task titles, hide default dots */
+.cal-day-event-dot { display: none !important; }
+.cal-events-list { margin: 4px 0 0 0; padding-left: 12px; }
+.cal-events-list li { list-style: disc; }
+.cal-events-list a { font-size: 0.85rem; text-decoration: none; }
+.cal-events-list a:hover { text-decoration: underline; }
+
+/* Bootstrap Calendar month view: replace grey dot with text titles */
+.cal-month-day .events-list {
+    left: 0;
+    right: 0; /* allow full width for text */
+}
+.cal-month-day .events-list .event,
+.cal-month-day .events-list .event-item {
+    /* neutralize dot styles from vendor CSS */
+    background: transparent !important;
+    width: auto !important;
+    height: auto !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    display: block; /* one title per line */
+    margin: 0 0 2px 0 !important;
+    padding: 0 2px;
+    color: #0d6efd; /* bootstrap primary link color */
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.cal-month-day .events-list .event:hover,
+.cal-month-day .events-list .event-item:hover {
+    background: transparent !important;
+    color: #0a58ca; /* darker hover */
+    text-decoration: underline;
 }

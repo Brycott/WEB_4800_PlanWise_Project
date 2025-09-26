@@ -111,11 +111,11 @@ def calendar_view(request):
     from django.utils.dateparse import parse_datetime
     tasks = Task.objects.filter(user=request.user).exclude(due_date__isnull=True)
     events = []
-    from datetime import datetime
+    from datetime import datetime, time
     for task in tasks:
         if task.due_date:
-            # Convert date to timestamp at midnight
-            dt = datetime.combine(task.due_date, datetime.min.time())
+            # Convert date to timestamp at local noon to avoid timezone shifts
+            dt = datetime.combine(task.due_date, time(hour=12, minute=0))
             timestamp = int(dt.timestamp() * 1000)
             events.append({
                 'id': task.id,

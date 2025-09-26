@@ -7,7 +7,7 @@
     <title>{% block title %}PlanWise{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore-min.js"></script>
     
@@ -25,7 +25,12 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            
+            <button id="sidebarToggle" class="btn btn-sm sidebar-toggle-btn" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+                
+                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-toggle-on" viewBox="0 0 16 16">
+                 <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8"/>
+                </svg>
+            </button>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -85,5 +90,52 @@
         </div>
 </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function(){
+            const body = document.body;
+            const toggleBtn = document.getElementById('sidebarToggle');
+            const sideNav = document.querySelector('.sidenav');
+            const STORAGE_KEY = 'planwise.sidebar.collapsed';
+            if(!toggleBtn || !sideNav) return; // safety
+
+            function setIcon(collapsed){
+                // Optionally switch icon (toggle-on/off) if desired later
+                toggleBtn.classList.toggle('collapsed', collapsed);
+            }
+
+            function applyState(collapsed){
+                if(collapsed){
+                    body.classList.add('sidebar-collapsed');
+                    sideNav.classList.add('sidenav-collapsed');
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                } else {
+                    body.classList.remove('sidebar-collapsed');
+                    sideNav.classList.remove('sidenav-collapsed');
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                }
+                setIcon(collapsed);
+            }
+
+            // Initial state from storage
+            let collapsedInit = false;
+            try {
+                collapsedInit = localStorage.getItem(STORAGE_KEY) === '1';
+            } catch(e) {}
+            applyState(collapsedInit);
+
+            toggleBtn.addEventListener('click', function(){
+                const willCollapse = !body.classList.contains('sidebar-collapsed');
+                applyState(willCollapse);
+                // Fallback inline style force (in case specificity issues)
+                if(willCollapse){
+                    sideNav.style.width = '0px';
+                } else {
+                    sideNav.style.width = '200px';
+                }
+                console.log('[Sidebar]', 'collapsed =', willCollapse);
+                try { localStorage.setItem(STORAGE_KEY, willCollapse ? '1' : '0'); } catch(e) {}
+            });
+        })();
+    </script>
 </body>
 </html>
