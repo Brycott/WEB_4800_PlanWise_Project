@@ -5,7 +5,8 @@ from django.urls import reverse
 # Create your models here.
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100)
     
     class Meta:
         verbose_name_plural = "Categories"
@@ -23,12 +24,13 @@ class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     due_date = models.DateField(null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, null=True, blank=True)
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
+
     class Meta:
         ordering = ['-created_at']
     
@@ -36,8 +38,4 @@ class Task(models.Model):
         return self.title
     
     def get_absolute_url(self):
-        return reverse('task_detail', kwargs={'pk': self.pk})
-    
-
-
-
+        return reverse('tasks:task_detail', kwargs={'pk': self.pk})

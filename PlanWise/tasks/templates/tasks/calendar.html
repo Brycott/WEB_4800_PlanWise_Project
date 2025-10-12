@@ -2,8 +2,10 @@
 {%endblock %} {% block content %}
 <div class="container bg-secondaryc">
   <h2 class="mb-4">PlanWise Calendar</h2>
-  <div class="calendar-header">
-    <span class="mx-2" data-calendar-label="month"></span>
+  <div class="calendar-header d-flex">
+    <button class="btn btn-secondary me-2" data-calendar-nav="prev"><i class="bi bi-arrow-left"></i></button>
+    <h3 class="mb-0" data-calendar-label="month"></h3>
+    <button class="btn btn-secondary ms-2" data-calendar-nav="next"><i class="bi bi-arrow-right"></i></button>
   </div>
   <div id="calendar"></div>
 </div>
@@ -21,16 +23,22 @@
       console.error("Failed to parse events JSON:", e);
     }
     var $calendar = $("#calendar");
-    $calendar.calendar({
+    var calendar = $calendar.calendar({
       tmpl_path: '{% static "bootstrap-calendar/tmpls/" %}',
       events_source: events,
       tmpl_cache: false,
       view: 'month', // Ensure full month view
       weekbox: true, // Show full month grid
       onAfterViewLoad: function() {
-        var month = this.getTitle();
-        $('[data-calendar-label="month"]').text(month);
+        $('[data-calendar-label="month"]').text(this.getTitle());
       }
+    });
+
+    $('button[data-calendar-nav]').each(function() {
+        var $this = $(this);
+        $this.click(function() {
+            calendar.navigate($this.data('calendar-nav'));
+        });
     });
   });
 </script>
