@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+import uuid
 
 # Create your models here.
 
@@ -29,6 +30,11 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subtasks')
+    is_recurring = models.BooleanField(default=False)
+    recurrence_frequency = models.CharField(max_length=10, choices=[('daily', 'Daily'), ('weekly', 'Weekly'), ('monthly', 'Monthly')], blank=True, null=True)
+    recurrence_end_date = models.DateField(blank=True, null=True)
+    recurring_task_id = models.UUIDField(default=uuid.uuid4, editable=True)
 
 
     class Meta:

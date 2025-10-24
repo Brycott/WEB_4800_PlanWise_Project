@@ -5,9 +5,11 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ['title', 'description', 'category', 'due_date', 'is_completed']
+        fields = ['title', 'description', 'category', 'due_date', 'is_completed', 'is_recurring', 'recurrence_frequency', 'recurrence_end_date']
         widgets = {
-            'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'style': 'width: 25%'}),
+            'recurrence_end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'style': 'width: 25%'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'style': 'width: 25%'}),
         }
 
     def __init__(self, *args, **kwargs):

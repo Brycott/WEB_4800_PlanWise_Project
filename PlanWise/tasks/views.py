@@ -9,6 +9,31 @@ from .forms import TaskForm, CategoryForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from datetime import date
+from dateutil.relativedelta import relativedelta
+import uuid
+
+def _create_recurring_tasks(task, user, recurring_task_id):
+    if task.due_date and task.recurrence_end_date:
+        current_date = task.due_date
+        while current_date <= task.recurrence_end_date:
+            Task.objects.create(
+                title=task.title,
+                description=task.description,
+                category=task.category,
+                due_date=current_date,
+                user=user,
+                is_recurring=True,
+                recurrence_frequency=task.recurrence_frequency,
+                recurrence_end_date=task.recurrence_end_date,
+                recurring_task_id=recurring_task_id
+            )
+            if task.recurrence_frequency == 'daily':
+                current_date += relativedelta(days=1)
+            elif task.recurrence_frequency == 'weekly':
+                current_date += relativedelta(weeks=1)
+            elif task.recurrence_frequency == 'monthly':
+                current_date += relativedelta(months=1)
 
 # Create your views here.
 class TaskListView(LoginRequiredMixin, ListView):
@@ -18,7 +43,7 @@ class TaskListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Show only top-level tasks
-        return Task.objects.filter(user=self.request.user).select_related('category')
+        return Task.objects.filter(user=self.request.user, parent__isnull=True).select_related('category')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -41,10 +66,17 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
     template_name = 'tasks/task_detail.html'
     context_object_name = 'task'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['subtasks'] = self.object.subtasks.all()
+        # Pass user to the form
+        context['form'] = TaskForm(user=self.request.user)
+        return context
 
     def post(self, request, *args, **kwargs):
-        parent_task = self.get_object()
-        form = TaskForm(request.POST)
+        self.object = self.get_object() #  Assign object for context
+        parent_task = self.object
+        form = TaskForm(request.POST, user=request.user)  # Pass user to the form
         if form.is_valid():
             new_task = form.save(commit=False)
             new_task.parent = parent_task
@@ -54,6 +86,7 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         else:
             # If form is invalid, re-render the page with the context
             context = self.get_context_data(**kwargs)
+            context['form'] = form  # Pass the invalid form back to the template
             return self.render_to_response(context)
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
@@ -62,18 +95,22 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
     template_name = 'tasks/task_form.html'
     success_url = reverse_lazy('tasks:task_list')
 
-
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
-
-
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        self.object = form.save(commit=False)
+
+        if self.object.is_recurring:
+            recurring_task_id = uuid.uuid4()
+            _create_recurring_tasks(self.object, self.request.user, recurring_task_id)
+            return redirect(self.success_url)
+        
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
     model = Task
@@ -94,13 +131,37 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+
+        if self.object.is_recurring:
+            # Delete all future recurring tasks with the same recurring_task_id
+            Task.objects.filter(
+                user=self.request.user,
+                recurring_task_id=self.object.recurring_task_id,
+            ).delete()
+
+            _create_recurring_tasks(self.object, self.request.user, self.object.recurring_task_id)
+            return redirect(self.success_url)
+
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
 class TaskDeleteView(LoginRequiredMixin, DeleteView):
     model = Task
     template_name = 'tasks/task_confirm_delete.html'
     success_url = reverse_lazy('tasks:task_list')
-    
+
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.subtasks.filter(is_completed=False).exists():
+            messages.error(request, 'Cannot delete a parent task with incomplete subtasks.', extra_tags='alert-danger')
+            return redirect('tasks:task_list')
+        messages.success(request, 'Task deleted successfully.', extra_tags='alert-success')
+        return super().post(request, *args, **kwargs)
 
 class CategoryListView(LoginRequiredMixin, ListView):
     model = Category
@@ -133,6 +194,10 @@ def task_by_category(request, category_id):
 @login_required
 def toggle_complete(request, pk):
     task = get_object_or_404(Task, pk=pk, user=request.user)
+    # Prevent completing a parent task if it has incomplete subtasks
+    if not task.is_completed and task.subtasks.filter(is_completed=False).exists():
+        messages.error(request, 'Cannot complete a parent task with incomplete subtasks.', extra_tags='alert-danger')
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('tasks:task_list')))
     task.is_completed = not task.is_completed
     task.save()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('tasks:task_list')))
@@ -174,7 +239,7 @@ class CategoryUpdateView(LoginRequiredMixin, UpdateView):
 class CategoryDeleteView(LoginRequiredMixin, DeleteView):
     model = Category
     template_name = 'tasks/category_confirm_delete.html'
-    success_url = reverse_lazy('tasks:category_list')
+    success_url = reverse_lazy('tasks:task_list')
 
     def get_queryset(self):
         return Category.objects.filter(user=self.request.user)
