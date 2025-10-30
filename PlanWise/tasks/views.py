@@ -206,7 +206,7 @@ def toggle_complete(request, pk):
 @login_required
 def calendar_view(request):
     import json
-    from django.utils.dateparse import parse_datetime
+    from django.utils.timezone import now
     tasks = Task.objects.filter(user=request.user).exclude(due_date__isnull=True)
     events = []
     from datetime import datetime, time
@@ -215,11 +215,20 @@ def calendar_view(request):
             # Convert date to timestamp at local noon to avoid timezone shifts
             dt = datetime.combine(task.due_date, time(hour=12, minute=0))
             timestamp = int(dt.timestamp() * 1000)
+            
+            # Determine task status and assign a class
+            task_class = 'event-info' # Default class
+            if task.is_completed:
+                task_class = 'event-success' # Green for completed
+            elif task.due_date < now().date():
+                task_class = 'event-important' # Red for overdue
+            
             events.append({
                 'id': task.id,
                 'title': task.title,
                 'start': timestamp,
                 'url': f"/task/{task.id}/",  # Match Django URL pattern
+                'class': task_class,
             })
     events_json = json.dumps(events)
     return render(request, 'tasks/calendar.html', {'events_json': events_json, 'tasks': tasks})

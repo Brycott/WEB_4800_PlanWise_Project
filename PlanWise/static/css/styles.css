@@ -1,39 +1,55 @@
-/* Sleek and Sophisticated Palette */
+/* Clean and Modern Light Theme */
 
 :root {
-    --background: #1A202C;
-    --text: #E2E8F0;
-    --primary-accent: #38B2AC;
-    --secondary-accent: #667EEA;
-    --success: #48BB78;
-    --error: #F56565;
+    --background: #F8F9FA;
+    --background-lighter: #FFFFFF;
+    --text: #212529;
+    --primary-accent: #007BFF;
+    --secondary-accent: #6C757D;
+    --success: #28A745;
+    --error: #DC3545;
+    --border-color: #DEE2E6;
     --sidebar-width: 200px;
 }
 
 body {
     background-color: var(--background) !important;
     color: var(--text);
+    font-family: 'Lato', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand, .card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
 }
 
 .card {
-    background-color: #2D3748;
-    border: 1px solid #4A5568;
+    background-color: var(--background-lighter);
+    border: 1px solid var(--border-color);
     color: var(--text);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
-    background-color: #1A202C !important;
-    border-bottom: 1px solid #4A5568;
+    background-color: var(--background-lighter) !important;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .card-footer {
-    background-color: #1A202C;
-    border-top: 1px solid #4A5568;
+    background-color: var(--background-lighter);
+    border-top: 1px solid var(--border-color);
 }
 
 .list-group-item {
     background-color: transparent;
-    border-color: #4A5568;
+    border-color: var(--border-color);
     color: var(--text);
 }
 
@@ -44,21 +60,25 @@ body {
 .btn-primary {
     background-color: var(--primary-accent);
     border-color: var(--primary-accent);
+    color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #2C9D9A;
-    border-color: #2C9D9A;
+    background-color: #0069D9;
+    border-color: #0062CC;
+    color: #fff;
 }
 
 .btn-secondary {
     background-color: var(--secondary-accent);
     border-color: var(--secondary-accent);
+    color: #fff;
 }
 
 .btn-secondary:hover {
-    background-color: #5068C8;
-    border-color: #5068C8;
+    background-color: #5A6268;
+    border-color: #545B62;
+    color: #fff;
 }
 
 .btn-outline-primary {
@@ -68,7 +88,7 @@ body {
 
 .btn-outline-primary:hover {
     background-color: var(--primary-accent);
-    color: var(--background);
+    color: #fff;
 }
 
 .btn-outline-secondary {
@@ -78,7 +98,7 @@ body {
 
 .btn-outline-secondary:hover {
     background-color: var(--secondary-accent);
-    color: var(--background);
+    color: #fff;
 }
 
 .badge.bg-success {
@@ -90,18 +110,25 @@ body {
 }
 
 .alert-success {
-    background-color: var(--success);
-    color: #fff;
+    background-color: #D4EDDA;
+    color: #155724;
+    border-color: #C3E6CB;
 }
 
 .alert-danger, .alert-error {
-    background-color: var(--error);
-    color: #fff;
+    background-color: #F8D7DA;
+    color: #721C24;
+    border-color: #F5C6CB;
 }
 
 .navbar {
-    background-color: #2D3748;
+    background-color: var(--background-lighter);
     margin-left: var(--sidebar-width);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar .nav-link, .navbar .navbar-text, .navbar .navbar-brand, #sidebarToggleIcon {
+    color: var(--text) !important;
 }
 
 .sidenav {
@@ -111,10 +138,10 @@ body {
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #1A202C;
+    background-color: var(--background-lighter);
     overflow-x: hidden;
     padding-top: 20px;
-    border-right: 1px solid #4A5568;
+    border-right: 1px solid var(--border-color);
 }
 
 .sidenav a {
@@ -139,7 +166,7 @@ body {
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) > * {
-    --bs-table-accent-bg: #2D3748;
+    --bs-table-accent-bg: #F2F2F2;
     color: var(--text);
 }
 
@@ -169,4 +196,56 @@ body.sidebar-collapsed .navbar {
 .cal-month-day .events-list .event-item {
     background: transparent !important;
     color: var(--primary-accent);
+}
+
+/* Calendar event colors */
+.event-success {
+    background-color: var(--success) !important;
+    color: var(--success) !important;
+}
+
+.event-important {
+    background-color: var(--error) !important;
+    color: var(--error) !important;
+}
+
+.event-info {
+    background-color: var(--secondary-accent) !important;
+    color: var(--secondary-accent) !important;
+}
+
+body.dark-mode {
+    --background: #2E3440;
+    --background-lighter: #3B4252;
+    --text: #ECEFF4;
+    --primary-accent: #88C0D0;
+    --secondary-accent: #81A1C1;
+    --success: #A3BE8C;
+    --error: #BF616A;
+    --border-color: #4C566A;
+}
+
+body.dark-mode .card {
+    background: rgba(59, 66, 82, 0.7); /* Semi-transparent background */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* For Safari */
+    border: 1px solid rgba(76, 86, 106, 0.3);
+}
+
+body.dark-mode .alert-success {
+    background-color: var(--success);
+    color: #2E3440;
+}
+
+body.dark-mode .alert-danger, body.dark-mode .alert-error {
+    background-color: var(--error);
+    color: #2E3440;
+}
+
+body.dark-mode .btn-primary {
+    color: var(--background);
+}
+
+body.dark-mode .btn-primary:hover {
+    color: var(--background);
 }
