@@ -62,6 +62,7 @@
                                 <span id="theme-label" class="ms-2"></span>
                             </a>
                         </li>
+                        <div class="d-flex align-items-center">
                         <li class="nav-item">
                             <span class="navbar-text me-2">Hello, {{ user.username }}!</span>
                         </li>
@@ -72,6 +73,7 @@
                                 <button type="submit" class="nav-link btn btn-link" style="padding:0;">Logout</button>
                             </form>
                         </li>
+                        </div>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">Login</a>

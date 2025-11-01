@@ -14,6 +14,7 @@ urlpatterns = [
     path('categories/', views.CategoryListView.as_view(), name='category_list'),
     path('categories/<int:pk>/update/', views.CategoryUpdateView.as_view(), name='category_update'),
     path('categories/<int:pk>/delete/', views.CategoryDeleteView.as_view(), name='category_delete'),
-    path('category/<int:category_id>/', views.task_by_category, name='tasks_by_category'),
+    path('export/', views.export_tasks, name='export_tasks'),
+    path('category/<int:category_id>/tasks/', views.task_by_category, name='tasks_by_category'),
     path('calendar/', views.calendar_view, name='task_calendar'),
 ]

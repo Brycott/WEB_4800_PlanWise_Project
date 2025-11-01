@@ -1,6 +1,68 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from lxml import etree
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import Task, Category
+from .forms import TaskForm, CategoryForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
+
+def generate_svg(tasks):
+    response = HttpResponse(content_type='image/svg+xml')
+    response['Content-Disposition'] = 'attachment; filename="tasks.svg"'
+
+    svg = etree.Element("svg", width="500", height=str(len(tasks) * 30 + 50))
+    etree.SubElement(svg, "text", x="10", y="20").text = "Selected Tasks"
+
+    y = 40
+    for task in tasks:
+        etree.SubElement(svg, "text", x="10", y=str(y)).text = f"- {task.title}"
+        y += 20
+
+    response.write(etree.tostring(svg, pretty_print=True))
+    return response
+
+def generate_pdf(tasks):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="tasks.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    width, height = letter
+
+    p.drawString(inch, height - inch, "Selected Tasks")
+
+    y = height - 1.5 * inch
+    for task in tasks:
+        p.drawString(inch, y, f"- {task.title}")
+        y -= 0.25 * inch
+
+    p.showPage()
+    p.save()
+
+    return response
+
+def export_tasks(request):
+    if request.method == 'POST':
+        task_ids = request.POST.getlist('task_ids')
+        format = request.POST.get('format')
+
+        if not task_ids:
+            return redirect('tasks:task_list')
+
+        tasks = Task.objects.filter(id__in=task_ids)
+
+        if format == 'pdf':
+            return generate_pdf(tasks)
+        elif format == 'svg':
+            return generate_svg(tasks)
+
+    return redirect('tasks:task_list')
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
