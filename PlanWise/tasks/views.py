@@ -1,6 +1,4 @@
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
@@ -47,6 +45,8 @@ def generate_pdf(tasks):
 
     return response
 
+import csv
+
 def export_tasks(request):
     if request.method == 'POST':
         task_ids = request.POST.getlist('task_ids')
@@ -61,9 +61,26 @@ def export_tasks(request):
             return generate_pdf(tasks)
         elif format == 'svg':
             return generate_svg(tasks)
+        elif format == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="tasks.csv"'
 
-    return redirect('tasks:task_list')
-from django.contrib.auth.mixins import LoginRequiredMixin
+            writer = csv.writer(response)
+            writer.writerow(['Title', 'Description', 'Category', 'Due Date', 'Completed'])
+
+            for task in tasks:
+                writer.writerow([
+                    task.title,
+                    task.description,
+                    task.category.name if task.category else '',
+                    task.due_date,
+                    task.is_completed
+                ])
+
+            return response
+
+    tasks = Task.objects.filter(user=request.user)
+    return render(request, 'tasks/export_tasks.html', {'tasks': tasks})
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Task, Category
