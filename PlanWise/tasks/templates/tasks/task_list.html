@@ -4,6 +4,11 @@
 <div class=" task_list container task-list">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mt-2">My Tasks</h2>
+         <!-- SEARCH FORM -->
+        <form method="get" class="d-flex">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search tasks..." class="form-control me-2">
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+        </form>
     </div>
 
     <!-- Summary Cards -->
@@ -83,7 +88,7 @@
 
     {% if tasks %}
     <!-- Card View -->
-        <div id="cardView" class="row">
+        <div id="card-view" class="row">
         {% for task in tasks %}
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card shadow h-100 {% if task.completed %}border-success{% endif %}">
@@ -173,7 +178,7 @@
         </div>
 
      <!-- List View -->
-     <div id="listView" class="d-none">
+     <div id="list-view">
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -189,13 +194,13 @@
             <tbody>
                 {% for task in tasks %}
                 <tr>
-                    <td>
+                    <td class="text-dark">
                         {{ task.title }}
                         
                     </td>
-                    <td>{{ task.description|truncatewords:20 }}</td>
-                    <td>{{ task.category }}</td>
-                    <td>{{ task.due_date|date:"M d, Y" }}</td>
+                    <td class="text-dark">{{ task.description|truncatewords:20 }}</td>
+                    <td class="text-dark">{{ task.category }}</td>
+                    <td class="text-dark">{{ task.due_date|date:"M d, Y" }}</td>
                     <td>
                         {% if task.is_completed %}
                             <span class="badge bg-success">Completed</span>
@@ -227,11 +232,16 @@
         </div>
      {% else %}
      <div class="text-center mt-5">
-        <h3>No tasks found.</h3>
-        <p class="mb-4">You have no tasks at the moment. Click the button below to create your first task!</p>
-        <a href="{% url 'task_create' %}" class="btn btn-primary btn-lg">
-            <i class="fas fa-plus"></i> Create task
-        </a>
+        {% if search_query %}
+            <h3>No tasks found matching your search.</h3>
+            <p class="mb-4">Please try a different search term.</p>
+        {% else %}
+            <h3>No tasks found.</h3>
+            <p class="mb-4">You have no tasks at the moment. Click the button below to create your first task!</p>
+            <a href="{% url 'tasks:task_create' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus"></i> Create task
+            </a>
+        {% endif %}
         </div>
      {% endif %}
     </div>

@@ -10,6 +10,8 @@ from .forms import TaskForm, CategoryForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 def generate_svg(tasks):
     response = HttpResponse(content_type='image/svg+xml')
@@ -81,13 +83,9 @@ def export_tasks(request):
 
     tasks = Task.objects.filter(user=request.user)
     return render(request, 'tasks/export_tasks.html', {'tasks': tasks})
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from .models import Task, Category
-from .forms import TaskForm, CategoryForm
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.utils import timezone
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import uuid
@@ -119,10 +117,18 @@ class TaskListView(LoginRequiredMixin, ListView):
     model = Task
     template_name = 'tasks/task_list.html'
     context_object_name = 'tasks'
+    paginate_by = 6 
 
     def get_queryset(self):
-        # Show only top-level tasks
-        return Task.objects.filter(user=self.request.user, parent__isnull=True).select_related('category')
+        queryset = Task.objects.filter(user=self.request.user, parent__isnull=True).select_related('category')
+        search_query = self.request.GET.get('q')
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+        return queryset
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -137,7 +143,14 @@ class TaskListView(LoginRequiredMixin, ListView):
 
         # Get categories
         context['categories'] = Category.objects.all()
+        
+        # Pass search query to template for preserving it in pagination links
+        context['search_query'] = self.request.GET.get('q', '')
+        
         return context
+
+
+
 
 
 class TaskDetailView(LoginRequiredMixin, DetailView):

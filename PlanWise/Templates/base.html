@@ -190,6 +190,30 @@
         });
     })();
 </script>
+<script>
+    function showCardView() {
+        document.getElementById('card-view').style.display = 'flex';
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('currentViewLabel').textContent = 'Card View';
+        localStorage.setItem('view', 'card');
+    }
+
+    function showListView() {
+        document.getElementById('card-view').style.display = 'none';
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('currentViewLabel').textContent = 'List View';
+        localStorage.setItem('view', 'list');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const lastView = localStorage.getItem('view');
+        if (lastView === 'list') {
+            showListView();
+        } else {
+            showCardView();
+        }
+    });
+</script>
 {% endif %}
 </body>
 </html>
