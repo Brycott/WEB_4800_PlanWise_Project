@@ -35,12 +35,34 @@ def generate_pdf(tasks):
     p = canvas.Canvas(response, pagesize=letter)
     width, height = letter
 
-    p.drawString(inch, height - inch, "Selected Tasks")
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(inch, height - inch, "Tasks")
 
+    p.setFont("Helvetica", 12)
     y = height - 1.5 * inch
     for task in tasks:
-        p.drawString(inch, y, f"- {task.title}")
-        y -= 0.25 * inch
+        # Draw checkbox
+        checkbox_size = 10
+        p.rect(inch, y, checkbox_size, checkbox_size)
+        if task.is_completed:
+            p.drawString(inch + 2, y + 2, "✔")
+
+        # Draw task title
+        p.drawString(inch + checkbox_size + 5, y, task.title)
+        
+        if task.description:
+            p.setFont("Helvetica", 10)
+            # move the description down a bit
+            y -= 0.25 * inch
+            p.drawString(inch + 0.25 * inch, y, task.description)
+            p.setFont("Helvetica", 12)
+
+
+        y -= 0.5 * inch
+        if y < inch:
+            p.showPage()
+            p.setFont("Helvetica", 12)
+            y = height - inch
 
     p.showPage()
     p.save()
@@ -68,15 +90,16 @@ def export_tasks(request):
             response['Content-Disposition'] = 'attachment; filename="tasks.csv"'
 
             writer = csv.writer(response)
-            writer.writerow(['Title', 'Description', 'Category', 'Due Date', 'Completed'])
+            writer.writerow(['Completed', 'Title', 'Description', 'Category', 'Due Date'])
 
             for task in tasks:
+                completed_char = "✔" if task.is_completed else "☐"
                 writer.writerow([
+                    completed_char,
                     task.title,
                     task.description,
                     task.category.name if task.category else '',
-                    task.due_date,
-                    task.is_completed
+                    task.due_date
                 ])
 
             return response

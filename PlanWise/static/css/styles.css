@@ -187,10 +187,7 @@ body.sidebar-collapsed .navbar {
 }
 
 /* Calendar styles */
-.cal-month-day .events-list .event:hover {
-    background: var(--primary-accent);
-    color: #fff;
-}
+
 
 .cal-month-day .events-list .event,
 .cal-month-day .events-list .event-item {
@@ -246,6 +243,3 @@ body.dark-mode .btn-primary {
     color: var(--background);
 }
 
-body.dark-mode .btn-primary:hover {
-    color: var(--background);
-}
